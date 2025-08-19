@@ -96,7 +96,10 @@ class TaskTests(TestCase):
         self.assertTrue(Task.objects.filter(text='Test Task').exists())
 
     def test_get_task_list(self):
-        response = self.client.get(reverse('get-tasks'))  # Updated URL name
+        response = self.client.get(
+            reverse('get-tasks'), 
+            {'date': '2025-08-17'}  # Pass the date matching the created task
+        )
         self.assertEqual(response.status_code, 200)
         data = json.loads(response.content)  # Parse JSON response
         self.assertIn('tasks', data)

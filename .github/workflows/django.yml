@@ -15,14 +15,13 @@ jobs:
         image: mysql:8.0
         env:
           MYSQL_ROOT_PASSWORD: root
-          MYSQL_DATABASE: test_db
         ports:
           - 3306:3306
         options: >-
-          --health-cmd="mysqladmin ping -h localhost -uroot -proot"
+          --health-cmd="mysqladmin ping --silent"
           --health-interval=10s
           --health-timeout=5s
-          --health-retries=5
+          --health-retries=3
 
     strategy:
       max-parallel: 4
@@ -33,7 +32,7 @@ jobs:
     - uses: actions/checkout@v4
 
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v5
+      uses: actions/setup-python@v3
       with:
         python-version: ${{ matrix.python-version }}
 
@@ -41,9 +40,9 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
-        pip install pylint mysqlclient
+        pip install pylint
 
-    - name: Wait for MySQL
+    - name: Wait for DB
       run: |
         until mysqladmin ping -h127.0.0.1 -uroot -proot --silent; do
           echo "Waiting for database connection..."
@@ -51,16 +50,17 @@ jobs:
         done
 
     - name: Run Pylint
-      run: pylint **/*.py
+      run: |
+        pylint **/*.py
 
-    - name: Run Django Tests
+    - name: Run Tests
       working-directory: ./todoapp
       env:
-        DB_NAME: test_db
+        DB_NAME: github_actions_test
         DB_USER: root
         DB_PASSWORD: root
         DB_HOST: 127.0.0.1
-        GITHUB_ACTIONS: "true"
+        GITHUB_ACTIONS: true
       run: |
         python manage.py migrate --noinput
         python manage.py test

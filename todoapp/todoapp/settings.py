@@ -61,9 +61,9 @@ DATABASES = {
 
 if os.getenv('GITHUB_ACTIONS') == 'true':
     DATABASES['default']['TEST'] = {
-        'NAME': 'github_actions_test',
-        'HOST': '127.0.0.1',
+        'NAME': None,  # let Django create test_<NAME>
     }
+
 
 
 AUTH_PASSWORD_VALIDATORS = [

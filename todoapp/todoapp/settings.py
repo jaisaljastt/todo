@@ -132,3 +132,8 @@ LOGIN_URL = '/login/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+if os.getenv('GITHUB_ACTIONS') == 'true':
+    DATABASES['default']['TEST'] = {
+        'NAME': os.getenv('DB_NAME', 'test_db')
+    }

@@ -15,6 +15,7 @@ jobs:
         image: mysql:8.0
         env:
           MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: todo   # <-- base DB for migrations, not the test one
         ports:
           - 3306:3306
         options: >-
@@ -22,6 +23,7 @@ jobs:
           --health-interval=10s
           --health-timeout=5s
           --health-retries=3
+
 
     strategy:
       max-parallel: 4

@@ -1,0 +1,81 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Check Your Inbox - TODO BY JST</title>
+    <link
+      rel="stylesheet"
+      href="{% static 'password/password-reset-flow.css' %}"
+    />
+  </head>
+  <body>
+    <!-- Navbar -->
+    <nav class="navbar">
+      <div class="nav-content">
+        <h1 class="app-title">TODO</h1>
+        <h2 class="app-subtitle">BY JST</h2>
+      </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <div class="card">
+        <div class="card-header">
+          <!-- Messages Block -->
+          {% if messages %} {% for message in messages %}
+          <div
+            class="{% if message.tags %}{{ message.tags }}-messages{% else %}error-messages{% endif %}"
+          >
+            {{ message }}
+          </div>
+          {% endfor %} {% endif %}
+          <div class="icon-container">
+            <!-- Mail Icon SVG -->
+            <svg
+              class="mail-icon"
+              width="32"
+              height="32"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <rect width="20" height="16" x="2" y="4" rx="2" />
+              <path d="m22 7-10 5L2 7" />
+            </svg>
+          </div>
+          <h2 class="card-title">Check Your Inbox</h2>
+          <p class="card-description">
+            We've sent a password reset link to your given email address
+          </p>
+          <p class="card-note">
+            Check your email and click the link to reset your password.
+          </p>
+        </div>
+
+        <div class="form-footer">
+          <form
+            method="POST"
+            action="{% url 'password_reset_resend' %}"
+            style="display: inline"
+          >
+            {% csrf_token %}
+            <button type="submit" class="resend-btn">Resend Email</button>
+          </form>
+          <p class="register-link">
+            <a href="{% url 'login' %}" class="link">Back to Sign In</a>
+          </p>
+        </div>
+      </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <p class="footer-text">build by jst</p>
+    </footer>
+  </body>
+</html>

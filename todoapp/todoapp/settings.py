@@ -61,9 +61,10 @@ DATABASES = {
 
 if os.getenv('GITHUB_ACTIONS') == 'true':
     DATABASES['default']['TEST'] = {
-        'NAME': os.getenv('DB_NAME', 'test_db'),
+        'NAME': 'github_actions_test',
         'HOST': '127.0.0.1',
     }
+
 
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},

@@ -41,6 +41,11 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
+      - name: Lint code
+        run: |
+          cd todoapp
+          flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+
       - name: Run migrations
         run: |
           cd todoapp

@@ -2,3 +2,4 @@
 
 Login, Logout, Register and Main Home page.
 Basic Development done.
+Testing CI now

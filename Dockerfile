@@ -7,12 +7,9 @@ ENV PYTHONUNBUFFERED=1
 # Set work directory
 WORKDIR /app
 
-# Install system dependencies
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends \
-    build-essential \
-    default-libmysqlclient-dev \
-    pkg-config \
+# Install system dependencies, Install only what’s needed
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    curl \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Python dependencies

@@ -6,7 +6,17 @@ import sys
 
 def main():
     """Run administrative tasks."""
-    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'todoapp.settings')
+    # Load environment configuration first
+    from config.env import get_environment
+    
+    env = get_environment()
+    if env == 'production':
+        os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.django.production')
+    elif env == 'test':
+        os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.django.test')
+    else:
+        os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.django.local')
+    
     try:
         from django.core.management import execute_from_command_line
     except ImportError as exc:

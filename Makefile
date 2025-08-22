@@ -25,7 +25,7 @@ down:
 	docker-compose down
 
 test:
-	cd todoapp && python manage.py test --settings=todoapp.settings_ci
+	cd todoapp && python manage.py test --settings=config.django.test
 
 lint:
 	cd todoapp && flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
@@ -38,7 +38,7 @@ clean:
 setup:
 	pip install -r requirements.txt
 	pip install flake8
-	cd todoapp && python manage.py migrate --settings=todoapp.settings_ci
+	cd todoapp && python manage.py migrate --settings=config.django.test
 
 # AWS deployment (placeholder for future)
 deploy:

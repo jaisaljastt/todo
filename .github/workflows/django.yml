@@ -51,16 +51,28 @@ jobs:
         run: |
           cd todoapp
           python manage.py migrate --settings=config.django.test
+        env:
+          SECRET_KEY: ${{ secrets.SECRET_KEY }}
+          DJANGO_ENV: test
+          DEBUG: "False"
 
       - name: Run tests
         run: |
           cd todoapp
           python manage.py test --settings=config.django.test
+        env:
+          SECRET_KEY: ${{ secrets.SECRET_KEY }}
+          DJANGO_ENV: test
+          DEBUG: "False"
 
       - name: Check security issues
         run: |
           cd todoapp
           python manage.py check --deploy --settings=config.django.test
+        env:
+          SECRET_KEY: ${{ secrets.SECRET_KEY }}
+          DJANGO_ENV: test
+          DEBUG: "False"
 
   build:
     needs: test
@@ -76,4 +88,4 @@ jobs:
 
       - name: Test Docker image
         run: |
-          docker run --rm todo-app python manage.py check
+          docker run --rm -e SECRET_KEY=${{ secrets.SECRET_KEY }} -e DJANGO_ENV=test -e DEBUG=False todo-app python manage.py check

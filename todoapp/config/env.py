@@ -26,4 +26,4 @@ elif ENVIRONMENT == 'test':
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.django.test')
 else:
     # Development/local settings
-    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.django.base')
+    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.django.local')

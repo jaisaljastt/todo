@@ -9,9 +9,10 @@ WORKDIR /app
 
 # Install system dependencies, Install only what’s needed
 RUN apt-get update && apt-get install -y --no-install-recommends \
+    default-libmysqlclient-dev gcc \
     curl \
     && rm -rf /var/lib/apt/lists/*
-
+    
 # Install Python dependencies
 COPY requirements.txt /app/
 RUN pip install --no-cache-dir -r requirements.txt
@@ -19,8 +20,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy project
 COPY todoapp/ /app/
 
-# Collect static files
-RUN python manage.py collectstatic --noinput
+# Collect static files (skip during build, will be done at runtime)
+# RUN python manage.py collectstatic --noinput
 
 # Expose port
 EXPOSE 8000

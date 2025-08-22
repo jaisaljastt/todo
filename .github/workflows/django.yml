@@ -84,7 +84,7 @@ jobs:
 
       - name: Build Docker image
         run: |
-          docker build -t todo-app .
+          docker build --no-cache -t todo-app .
 
       - name: Test Docker image
         run: |

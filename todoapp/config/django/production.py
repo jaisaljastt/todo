@@ -1,7 +1,7 @@
 """
 Production settings for AWS deployment
 """
-from .settings import *
+from .base import *
 import os
 
 # SECURITY WARNING: don't run with debug turned on in production!
@@ -20,10 +20,10 @@ ALLOWED_HOSTS = [
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': os.environ.get('RDS_DB_NAME', 'todo'),
-        'USER': os.environ.get('RDS_USERNAME', 'admin'),
-        'PASSWORD': os.environ.get('RDS_PASSWORD', ''),
-        'HOST': os.environ.get('RDS_HOSTNAME', 'localhost'),
+        'NAME': os.environ.get('RDS_DB_NAME'),
+        'USER': os.environ.get('RDS_USERNAME'),
+        'PASSWORD': os.environ.get('RDS_PASSWORD'),
+        'HOST': os.environ.get('RDS_HOSTNAME'),
         'PORT': os.environ.get('RDS_PORT', '3306'),
     }
 }

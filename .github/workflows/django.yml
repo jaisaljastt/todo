@@ -50,17 +50,17 @@ jobs:
       - name: Run migrations
         run: |
           cd todoapp
-          python manage.py migrate --settings=todoapp.settings_ci
+          python manage.py migrate --settings=config.django.test
 
       - name: Run tests
         run: |
           cd todoapp
-          python manage.py test --settings=todoapp.settings_ci
+          python manage.py test --settings=config.django.test
 
       - name: Check security issues
         run: |
           cd todoapp
-          python manage.py check --deploy --settings=todoapp.settings_ci
+          python manage.py check --deploy --settings=config.django.test
 
   build:
     needs: test

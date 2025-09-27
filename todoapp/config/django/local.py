@@ -21,7 +21,8 @@ DATABASES = {
 }
 
 # Email configuration for development
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+# Use the same email backend as base.py (Gmail)
+from .base import *  # This will include the email settings from base.py
 
 # Additional development-specific settings
 # Disable password validation for easier development

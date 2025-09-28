@@ -4,12 +4,17 @@ These settings are optimized for local development environment.
 """
 
 from .base import *
+import os
 
 # Debug mode for development
 DEBUG = True
 
 # Additional allowed hosts for local development
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', '0.0.0.0']
+ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS')
+if ALLOWED_HOSTS:
+    ALLOWED_HOSTS = ALLOWED_HOSTS.split(',')
+else:
+    ALLOWED_HOSTS = ['localhost', '127.0.0.1', '0.0.0.0']
 
 # Database configuration for local development
 # Using SQLite for simplicity in local development

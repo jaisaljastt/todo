@@ -20,10 +20,6 @@ DATABASES = {
     }
 }
 
-# Email configuration for development
-# Use the same email backend as base.py (Gmail)
-from .base import *  # This will include the email settings from base.py
-
 # Additional development-specific settings
 # Disable password validation for easier development
 AUTH_PASSWORD_VALIDATORS = []

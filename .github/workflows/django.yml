@@ -106,22 +106,30 @@ jobs:
     if: github.ref == 'refs/heads/main'
 
     steps:
+      - name: Create SSH directory
+        run: |
+          mkdir -p ~/.ssh/
+          echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
+
       - name: Deploy to EC2 via SSH
         uses: appleboy/ssh-action@v0.1.7
         with:
-          host: ${{ secrets.EC2_SSH_HOST }}
+          host: ${{ secrets.EC2_HOST }}
           username: ubuntu
           key: ${{ secrets.EC2_SSH_KEY }}
+          envs: DOCKERHUB_USERNAME
           script: |
-            # Pull latest image from Docker Hub
-            sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/todo-app:latest
+            # Pull latest image
+            docker pull ${{ secrets.DOCKERHUB_USERNAME }}/todo-app:latest
 
-            # Stop and remove old container
-            sudo docker stop todo-app || true
-            sudo docker rm todo-app || true
+            # Stop and remove existing container
+            docker stop todo-app || true
+            docker rm todo-app || true
 
-            # Run new container on port 8000
-            sudo docker run -d \
+            # Run new container
+            docker run -d \
               --name todo-app \
               --restart unless-stopped \
               -p 8000:8000 \
@@ -131,11 +139,14 @@ jobs:
             # Wait for container
             sleep 10
 
-            # Run Django migrations
-            sudo docker exec todo-app python manage.py migrate --noinput
+            # Run migrations
+            docker exec todo-app python manage.py migrate --noinput
 
             # Collect static files
-            sudo docker exec todo-app python manage.py collectstatic --noinput
+            docker exec todo-app python manage.py collectstatic --noinput
 
-            # Verify container is running
-            sudo docker ps | grep todo-app
+            # Check if container is running
+            if ! docker ps | grep -q todo-app; then
+              echo "Container failed to start"
+              exit 1
+            fi

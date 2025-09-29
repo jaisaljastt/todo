@@ -115,23 +115,24 @@ jobs:
           key: ${{ secrets.EC2_KEY }}
           script: |
             IMAGE=${{ secrets.DOCKERHUB_USERNAME }}/todo-app:latest
-
-            # Stop & remove old container (force)
-            sudo docker rm -f todo-app || true
-
+      
+            # Stop & remove old container
+            sudo docker ps -a -q --filter "name=todo-app" | xargs -r sudo docker rm -f
+      
             # Pull latest image
             sudo docker pull $IMAGE
-
-            # Run migrations and create superuser in a temporary container
+      
+            # Run migrations and create superuser
             sudo docker run --rm --env-file /home/ubuntu/.env $IMAGE bash -c "
               python manage.py migrate &&
-              python manage.py shell -c \"from django.contrib.auth import get_user_model; \
-              User = get_user_model(); \
-              username='$DJANGO_SUPERUSER_USERNAME'; \
-              email='$DJANGO_SUPERUSER_EMAIL'; \
-              password='$DJANGO_SUPERUSER_PASSWORD'; \
+              python manage.py shell -c \"from django.contrib.auth import get_user_model;
+              User = get_user_model();
+              import os;
+              username=os.environ['DJANGO_SUPERUSER_USERNAME'];
+              email=os.environ['DJANGO_SUPERUSER_EMAIL'];
+              password=os.environ['DJANGO_SUPERUSER_PASSWORD'];
               User.objects.filter(username=username).exists() or User.objects.create_superuser(username, email, password)\"
             "
-
+      
             # Start new container
             sudo docker run -d --name todo-app -p 8000:8000 --env-file /home/ubuntu/.env $IMAGE

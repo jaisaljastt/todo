@@ -108,23 +108,30 @@ jobs:
 
     steps:
       - name: SSH & deploy to EC2
-        uses: appleboy/ssh-action@v0.1.7
+        uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ubuntu
           key: ${{ secrets.EC2_KEY }}
           script: |
             IMAGE=${{ secrets.DOCKERHUB_USERNAME }}/todo-app:latest
-
-            # Stop old container
+      
+            # Stop and force remove old container
             sudo docker stop todo-app || true
-            sudo docker rm todo-app || true
-
+            sudo docker rm -f todo-app || true
+      
             # Pull latest image
             sudo docker pull $IMAGE
-
-            # Run migrations only
-            sudo docker run --rm --env-file /home/ubuntu/.env $IMAGE python manage.py migrate
-
-            # Start new container
-            sudo docker run -d --name todo-app -p 8000:8000 --env-file /home/ubuntu/.env $IMAGE
+      
+            # Run migrations with persistent SQLite
+            sudo docker run --rm \
+              --env-file /home/ubuntu/.env \
+              -v /home/ubuntu/sqlite_data/db.sqlite3:/app/db.sqlite3 \
+              $IMAGE python manage.py migrate
+      
+            # Start new container with same SQLite mount
+            sudo docker run -d --name todo-app \
+              -p 8000:8000 \
+              --env-file /home/ubuntu/.env \
+              -v /home/ubuntu/sqlite_data/db.sqlite3:/app/db.sqlite3 \
+              $IMAGE

@@ -115,17 +115,17 @@ jobs:
           key: ${{ secrets.EC2_KEY }}
           script: |
             # Stop existing container
-            docker stop todo-app || true
-            docker rm todo-app || true
+            sudo docker stop todo-app || true
+            sudo docker rm todo-app || true
 
             # Pull latest image
-            docker pull ${{ secrets.DOCKERHUB_USERNAME }}/todo-app:latest
+            sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/todo-app:latest
 
             # Run migrations
-            docker run --rm --env-file /home/ubuntu/.env ${{ secrets.DOCKERHUB_USERNAME }}/todo-app:latest python manage.py migrate
+            sudo docker run --rm --env-file /home/ubuntu/.env ${{ secrets.DOCKERHUB_USERNAME }}/todo-app:latest python manage.py migrate
 
             # Create superuser if not exists
-            docker run --rm --env-file /home/ubuntu/.env ${{ secrets.DOCKERHUB_USERNAME }}/todo-app:latest python manage.py shell -c "\
+            sudo docker run --rm --env-file /home/ubuntu/.env ${{ secrets.DOCKERHUB_USERNAME }}/todo-app:latest python manage.py shell -c "\
             from django.contrib.auth import get_user_model; \
             User = get_user_model(); \
             username='$DJANGO_SUPERUSER_USERNAME'; \
@@ -135,4 +135,4 @@ jobs:
             "
 
             # Start container
-            docker run -d --name todo-app -p 8000:8000 --env-file /home/ubuntu/.env ${{ secrets.DOCKERHUB_USERNAME }}/todo-app:latest
+            sudo docker run -d --name todo-app -p 8000:8000 --env-file /home/ubuntu/.env ${{ secrets.DOCKERHUB_USERNAME }}/todo-app:latest

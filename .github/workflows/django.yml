@@ -100,3 +100,39 @@ jobs:
       - name: Push to Docker Hub
         run: |
           docker push ${{ secrets.DOCKERHUB_USERNAME }}/todo-app:latest
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+      - name: SSH & deploy to EC2
+        uses: appleboy/ssh-action@v0.1.7
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ubuntu
+          key: ${{ secrets.EC2_KEY }}
+          script: |
+            # Stop existing container
+            docker stop todo-app || true
+            docker rm todo-app || true
+
+            # Pull latest image
+            docker pull ${{ secrets.DOCKERHUB_USERNAME }}/todo-app:latest
+
+            # Run migrations
+            docker run --rm --env-file /home/ubuntu/.env ${{ secrets.DOCKERHUB_USERNAME }}/todo-app:latest python manage.py migrate
+
+            # Create superuser if not exists
+            docker run --rm --env-file /home/ubuntu/.env ${{ secrets.DOCKERHUB_USERNAME }}/todo-app:latest python manage.py shell -c "\
+            from django.contrib.auth import get_user_model; \
+            User = get_user_model(); \
+            username='$DJANGO_SUPERUSER_USERNAME'; \
+            email='$DJANGO_SUPERUSER_EMAIL'; \
+            password='$DJANGO_SUPERUSER_PASSWORD'; \
+            User.objects.filter(username=username).exists() or User.objects.create_superuser(username, email, password)\
+            "
+
+            # Start container
+            docker run -d --name todo-app -p 8000:8000 --env-file /home/ubuntu/.env ${{ secrets.DOCKERHUB_USERNAME }}/todo-app:latest

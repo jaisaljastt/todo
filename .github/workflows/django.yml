@@ -116,29 +116,15 @@ jobs:
           script: |
             IMAGE=${{ secrets.DOCKERHUB_USERNAME }}/todo-app:latest
       
-            # Stop any process using port 8000
-            sudo lsof -t -i:8000 | xargs -r sudo kill -9 || true
-            
-            # Stop and remove old container
+            # Stop old container
             sudo docker stop todo-app || true
             sudo docker rm todo-app || true
       
             # Pull latest image
             sudo docker pull $IMAGE
-            
-            # Run migrations first
+      
+            # Run migrations only
             sudo docker run --rm --env-file /home/ubuntu/.env $IMAGE python manage.py migrate
-            
-            # Then create superuser
-            sudo docker run --rm --env-file /home/ubuntu/.env $IMAGE python manage.py shell -c "import os; from django.contrib.auth import get_user_model; User=get_user_model(); username=os.environ['DJANGO_SUPERUSER_USERNAME']; email=os.environ['DJANGO_SUPERUSER_EMAIL']; password=os.environ['DJANGO_SUPERUSER_PASSWORD']; User.objects.filter(username=username).exists() or User.objects.create_superuser(username, email, password)"
       
             # Start new container
-            sudo docker run -d \
-              --name todo-app \
-              --restart unless-stopped \
-              -p 8000:8000 \
-              --env-file /home/ubuntu/.env \
-              $IMAGE
-            
-            # Verify container is running
-            sudo docker ps | grep todo-app || (echo "Container failed to start" && exit 1)
+            sudo docker run -d --name todo-app -p 8000:8000 --env-file /home/ubuntu/.env $IMAGE

@@ -99,3 +99,43 @@ jobs:
       - name: Push to Docker Hub
         run: |
           docker push ${{ secrets.DOCKERHUB_USERNAME }}/todo-app:latest
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Deploy to EC2 via SSH
+        uses: appleboy/ssh-action@v0.1.7
+        with:
+          host: ${{ secrets.EC2_SSH_HOST }}
+          username: ubuntu
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            # Pull latest image from Docker Hub
+            sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/todo-app:latest
+
+            # Stop and remove old container
+            sudo docker stop todo-app || true
+            sudo docker rm todo-app || true
+
+            # Run new container on port 8000
+            sudo docker run -d \
+              --name todo-app \
+              --restart unless-stopped \
+              -p 8000:8000 \
+              --env-file /home/ubuntu/.env \
+              ${{ secrets.DOCKERHUB_USERNAME }}/todo-app:latest
+
+            # Wait for container
+            sleep 10
+
+            # Run Django migrations
+            sudo docker exec todo-app python manage.py migrate --noinput
+
+            # Collect static files
+            sudo docker exec todo-app python manage.py collectstatic --noinput
+
+            # Verify container is running
+            sudo docker ps | grep todo-app

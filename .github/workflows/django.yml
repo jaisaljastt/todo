@@ -6,6 +6,7 @@ on:
   pull_request:
     branches: [main]
   workflow_dispatch:
+
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -99,54 +100,3 @@ jobs:
       - name: Push to Docker Hub
         run: |
           docker push ${{ secrets.DOCKERHUB_USERNAME }}/todo-app:latest
-
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
-
-    steps:
-      - name: Create SSH directory
-        run: |
-          mkdir -p ~/.ssh/
-          echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
-
-      - name: Deploy to EC2 via SSH
-        uses: appleboy/ssh-action@v0.1.7
-        with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ubuntu
-          key: ${{ secrets.EC2_SSH_KEY }}
-          envs: DOCKERHUB_USERNAME
-          script: |
-            # Pull latest image
-            docker pull ${{ secrets.DOCKERHUB_USERNAME }}/todo-app:latest
-
-            # Stop and remove existing container
-            docker stop todo-app || true
-            docker rm todo-app || true
-
-            # Run new container
-            docker run -d \
-              --name todo-app \
-              --restart unless-stopped \
-              -p 8000:8000 \
-              --env-file /home/ubuntu/.env \
-              ${{ secrets.DOCKERHUB_USERNAME }}/todo-app:latest
-
-            # Wait for container
-            sleep 10
-
-            # Run migrations
-            docker exec todo-app python manage.py migrate --noinput
-
-            # Collect static files
-            docker exec todo-app python manage.py collectstatic --noinput
-
-            # Check if container is running
-            if ! docker ps | grep -q todo-app; then
-              echo "Container failed to start"
-              exit 1
-            fi

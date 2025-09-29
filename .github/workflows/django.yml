@@ -115,16 +115,16 @@ jobs:
           key: ${{ secrets.EC2_KEY }}
           script: |
             IMAGE=${{ secrets.DOCKERHUB_USERNAME }}/todo-app:latest
-      
+
             # Stop old container
             sudo docker stop todo-app || true
             sudo docker rm todo-app || true
-      
+
             # Pull latest image
             sudo docker pull $IMAGE
-      
+
             # Run migrations only
             sudo docker run --rm --env-file /home/ubuntu/.env $IMAGE python manage.py migrate
-      
+
             # Start new container
             sudo docker run -d --name todo-app -p 8000:8000 --env-file /home/ubuntu/.env $IMAGE

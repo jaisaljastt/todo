@@ -9,9 +9,7 @@ DEBUG = False
 
 # Update allowed hosts for production
 ALLOWED_HOSTS = [
-    'your-app-name.elasticbeanstalk.com',
-    'yourdomain.com',
-    'www.yourdomain.com',
+    '13.53.41.170',  # EC2 public IP
     'localhost',
     '127.0.0.1',
 ]
@@ -20,26 +18,24 @@ ALLOWED_HOSTS = [
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': os.environ.get('RDS_DB_NAME'),
-        'USER': os.environ.get('RDS_USERNAME'),
-        'PASSWORD': os.environ.get('RDS_PASSWORD'),
-        'HOST': os.environ.get('RDS_HOSTNAME'),
-        'PORT': os.environ.get('RDS_PORT', '3306'),
+        'NAME': os.environ.get('RDS_DB_NAME'),  # rds_db_name in .env
+        'USER': os.environ.get('RDS_USERNAME'),  # rds_username in .env
+        'PASSWORD': os.environ.get('RDS_PASSWORD'),  # rds_password in .env
+        'HOST': os.environ.get('RDS_HOSTNAME'),  # rds_hostname in .env
+        'PORT': os.environ.get('RDS_PORT', '3306'),  # rds_port in .env
     }
 }
 
-# Static files configuration for AWS S3
-STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
-DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+# Static files configuration
+STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')  # Collected static files directory
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'static'),  # Your project's static files
+]
 
-AWS_ACCESS_KEY_ID = os.environ.get('AWS_ACCESS_KEY_ID')
-AWS_SECRET_ACCESS_KEY = os.environ.get('AWS_SECRET_ACCESS_KEY')
-AWS_STORAGE_BUCKET_NAME = os.environ.get('AWS_STORAGE_BUCKET_NAME')
-AWS_S3_REGION_NAME = os.environ.get('AWS_S3_REGION_NAME', 'us-east-1')
-AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com'
-AWS_S3_OBJECT_PARAMETERS = {
-    'CacheControl': 'max-age=86400',
-}
+# Media files configuration
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # Security settings
 SECURE_SSL_REDIRECT = True
@@ -51,13 +47,14 @@ SECURE_CONTENT_TYPE_NOSNIFF = True
 SECURE_BROWSER_XSS_FILTER = True
 X_FRAME_OPTIONS = 'DENY'
 
-# Email configuration for production
+# Email configuration
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = os.environ.get('EMAIL_HOST', 'smtp.gmail.com')
-EMAIL_PORT = int(os.environ.get('EMAIL_PORT', 587))
-EMAIL_USE_TLS = True
-EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')
-EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
+EMAIL_HOST = 'smtp.gmail.com'  # Gmail SMTP server
+EMAIL_PORT = 587  # Gmail SMTP port
+EMAIL_USE_TLS = True  # Required for Gmail
+EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')  # Your Gmail address
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')  # Your app password
+DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL')  # Sender's email address
 
 # Logging configuration
 LOGGING = {

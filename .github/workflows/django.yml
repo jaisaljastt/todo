@@ -123,15 +123,24 @@ jobs:
             # Pull latest image
             sudo docker pull $IMAGE
 
-            # Run migrations with persistent SQLite
+            # Create necessary directories with proper permissions
+            sudo mkdir -p /home/ubuntu/sqlite_data
+            sudo mkdir -p /home/ubuntu/staticfiles
+            sudo mkdir -p /home/ubuntu/media
+            sudo chown -R ubuntu:ubuntu /home/ubuntu/sqlite_data /home/ubuntu/staticfiles /home/ubuntu/media
+
+            # Run migrations and collect static files
             sudo docker run --rm \
               --env-file /home/ubuntu/.env \
-              -v /home/ubuntu/sqlite_data/db.sqlite3:/app/db.sqlite3 \
-              $IMAGE python manage.py migrate
+              -v /home/ubuntu/staticfiles:/app/todoapp/staticfiles \
+              -v /home/ubuntu/media:/app/todoapp/media \
+              $IMAGE /bin/sh -c "python manage.py migrate --settings=config.django.production && python manage.py collectstatic --noinput --settings=config.django.production"
 
-            # Start new container with same SQLite mount
+            # Start new container with static and media mounts
             sudo docker run -d --name todo-app \
               -p 80:8000 \
               --env-file /home/ubuntu/.env \
-              -v /home/ubuntu/sqlite_data/db.sqlite3:/app/db.sqlite3 \
-              $IMAGE
+              -v /home/ubuntu/staticfiles:/app/todoapp/staticfiles \
+              -v /home/ubuntu/media:/app/todoapp/media \
+              -e DJANGO_SETTINGS_MODULE=config.django.production \
+              $IMAGE gunicorn config.wsgi:application --bind 0.0.0.0:8000 --workers 3

@@ -56,7 +56,7 @@ EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')  # Your Gmail address
 EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')  # Your app password
 DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL')  # Sender's email address
 
-# Logging configuration
+# Logging configuration for console output
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -67,15 +67,13 @@ LOGGING = {
         },
     },
     'handlers': {
-        'file': {
-            'level': 'INFO',
-            'class': 'logging.FileHandler',
-            'filename': '/var/log/django/todo.log',
+        'console': {
+            'class': 'logging.StreamHandler',
             'formatter': 'verbose',
         },
     },
     'root': {
-        'handlers': ['file'],
+        'handlers': ['console'],
         'level': 'INFO',
     },
 }

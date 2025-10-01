@@ -5,3 +5,4 @@ sqlparse==0.5.3
 tzdata==2025.2
 python-dotenv==1.0.0
 cryptography==43.0.1
+gunicorn==21.2.0

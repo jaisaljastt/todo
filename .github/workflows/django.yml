@@ -115,23 +115,23 @@ jobs:
           key: ${{ secrets.EC2_KEY }}
           script: |
             IMAGE=${{ secrets.DOCKERHUB_USERNAME }}/todo-app:latest
-      
+
             # Stop and force remove old container
             sudo docker stop todo-app || true
             sudo docker rm -f todo-app || true
-      
+
             # Pull latest image
             sudo docker pull $IMAGE
-      
+
             # Run migrations with persistent SQLite
             sudo docker run --rm \
               --env-file /home/ubuntu/.env \
               -v /home/ubuntu/sqlite_data/db.sqlite3:/app/db.sqlite3 \
               $IMAGE python manage.py migrate
-      
+
             # Start new container with same SQLite mount
             sudo docker run -d --name todo-app \
-              -p 8000:8000 \
+              -p 80:8000 \
               --env-file /home/ubuntu/.env \
               -v /home/ubuntu/sqlite_data/db.sqlite3:/app/db.sqlite3 \
               $IMAGE
